@@ -124,3 +124,97 @@ class AppToDo:
                     bgcolor=self.cor['item_fundo'],
                 )
             )
+
+            return ft.Container(
+                content=ft.Row([self.entrada_tarefa, botao_adicionar], alignment=ft.MainAxisAlignment. SPACE_BETWEEN),
+                padding=10,
+                bgcolor=self.cor['item_fundo'],
+                border_radius=8,
+            )
+        def criar_abas(self):
+            # Cria as abas para filtrar as tarefas (Todas, Pendentes, Concluídas)
+            self.abas = ft.Tabs(
+                selected_index=0,
+                animation_duration=300,
+                tabs=[
+                    ft.Tab(text="Todas", icon=ft.icons.LIST),
+                    ft.Tab(text="Pendentes", icon=ft.icons.PENDING_ACTIONS),
+                    ft.Tab(text="Concluídas", icon=ft.icons.TASK_ALT)
+                ],
+                on_change=self.atualizar_lista_tarefas
+            )
+            return self.abas
+        
+        def criar_lista_tarefas(self):
+            # Cria o container para a lista de tarefs
+            self.lista_tarefas = ft.Colimn(scroll=ft.ScrollMode.AUTO, spacing=10)
+            self.atualizar_lista_tarefas()
+            return ft.Container(
+                content=self.lista_tarefas,
+                height=400,
+                padding=10,
+                bgcolor=self.cor['fundo'],
+            )
+        
+        def atualizar_lista_tarefas(self, e=None):
+            # Atualiza a lista de tarefas com base na aba selecionada
+            self.lista_tarefas.controls.clear()
+            query = 'SELECT * FROM "tasks"'
+            if self.abas.selected_index == 1:
+                query += 'WHERE "status" = "imcomplete"'
+            elif self.abas.selected_index == 2:
+                query += 'WHERE "status" = "complete"'
+
+            tarefas = self.banco_dados.searchItens(query)
+            for tarefa in tarefas:
+                self.lista_tarefas.controls.append(self.criar_item_tarefa(tarefa))
+            self.page.update()
+
+        def criar_item_tarefa(self, tarefa):
+            # Cria um item individual da lista de tarefas
+            return ft.Container(
+                content=ft.Row([
+                    ft.Checkbox(
+                        value=tarefa[1] == 'complete',
+                        on_change=lambda e, t=tarefa[0]: self.alternar_status_tarefa(e, t),
+                        fill_color=self.cor['checkbox'],
+                    ),
+                    ft.Text(tarefa[0], color=self.cor['texto'], size=16, expand=True),
+                    ft.IconButton(
+                        icon=ft.icons.DELETE_OUTLINE,
+                        icon_color=self.cor['destaque'],
+                        on_click=lambda _, t=tarefa[0]: self.excluit_tarfa(t)
+                    )
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                border=ft.border.all(1, self.cor['borda']),
+                border_radius=8,
+                padding=10,
+                bgcolor=self.cor['item_fundo']
+            )
+        
+        def adicionar_tarefa(self, e):
+            #Adiciona uma nova tarefa ao banco de dados e atualiza a lista
+            if self.entrada_tarefa.value:
+                self.banco_dados.addTasks(self.entrada_tarefa.value, 'incomplete')
+                self.entrada_tarefa.value = ''
+                self.atualizar_lista_tarefas()
+
+                def alternar_status_tarefa(self, e, tarefa):
+                    #Alterna o status de uma tarefa entre completa e incompleta
+                    novo_status = 'complete' if e.control.value else 'incomplete'
+                    self.banco_dados.updateTasks(novo_status, tarefa)
+                    self.atualizar_lista_tarefas()
+
+                def excluir_tarefa(self, tarefa):
+                    # Exclui uma tarefa do banco de dados e atualiza a lista
+                    self.banco_dados.deleteTasks(tarefa)
+                    self.atualizar_lista_tarefas()
+                    self.page.snack_bar = ft.SnackBar(
+                        content=ft.Text(f"Tarefa '{tarefa}' excluída com sucesso", color=self.cor['texto']),
+                        bgcolor=self.cor['item_fundo']
+                    )
+                    self.page.sanck_bar.open = True
+                    self.page.update()
+
+if __name__ == "__main__":
+    ft.app(target=AppToDo) #Inicia o aplicatico Flet com a classe AppToDo
