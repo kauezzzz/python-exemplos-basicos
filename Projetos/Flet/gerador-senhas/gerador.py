@@ -39,7 +39,7 @@ def main(page: ft.Page):
 
 #Elemento de título da UI, com estilo e espaçamento no topo
     titulo = ft.Container(
-        content=ft.Text("Gerador de Senhas - Laura", size=28, weight="bold"),
+        content=ft.Text("Gerador de Senhas - Kauê", size=28, weight="bold"),
         padding=ft.padding.only(top=50)
     )
 
