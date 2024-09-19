@@ -45,7 +45,7 @@ class AppToDo:
     def pedir_nome_usuario(self):
         # Cria e exibe o formulário para o usuário inserir seu nome
         def salvar_usuario(e):
-            self.usuario = campo_usuario.value is campo_usuario.value else "Usuário"
+            self.usuario = campo_usuario.value if campo_usuario.value else "Usuário"
             self.page.controle.clear()
             self.main()
 
@@ -78,5 +78,49 @@ class AppToDo:
                     ], alignment=ft.MainAxisAlignment.CENTER, spacing=20),
                     padding=20,
                     bgcolor=self.cor['fundo'],
+                )
+            )
+
+        def main(self):
+            # Configura e exibe a interface principal do aplicativo
+            self.page.bgcolor = self.cor['fundo']
+            self.page.add(
+                self.criar_cabecalho(),
+                self.criar_secao_entrada(),
+                self.criar_abas(),
+                self.criar_lista_tarefas()
+            )
+
+        def criar_cabecalho(self):
+            # Cria o cabeçalho com saudação ao usuário
+            return ft.Container(
+                content=ft.Column([
+                    ft.Text(f'Olá, {self.usuario} 😀', size=24, color=self.cor['text'], weight=ft.FontWeight.BOLD),
+                    ft.Text('Gerencie suas tarefas diárias', size=16, color=self.cor['texto_secundario'])
+                ], alignment=ft.MainAxisAlignment.CENTER, spacing=5),
+                padding=ft.padding.symmetric(vertical=20)
+            )
+        
+        def criar_secao_entrada(self):
+            # Cria a seção de entrada para adicionar novas tarefas
+            self.entrada_tarefa = ft.TextField(
+                hint_text='Adicione uma nova tarefa...',
+                expand=True,
+                border_color=self.cor['borda'],
+                focused_border_color=self.cor['primaria'],
+                text_style=ft.TextStyle(color=self.cor['texto']),
+                hint_style=ft.TextStyle(color=self.cor['texto_secundario']),
+                bgcolor=self.cor['item_fundo'],
+                border_radius=8,
+            )
+
+            botao_adicionar = ft.IconButton(
+                icon=ft.icons.ADD_CIRCLE,
+                icon_color=self.cor['botao'],
+                icon_size=30,
+                on_click=self.adicionar_tarefa,
+                style=ft.ButtonStyle(
+                    shape=ft.CircleBorder(),
+                    bgcolor=self.cor['item_fundo'],
                 )
             )
